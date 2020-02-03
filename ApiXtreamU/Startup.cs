@@ -90,6 +90,16 @@ namespace ApiXtreamU
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
+                routes.MapRoute("api1","/panel_api.php",
+                          new { controller = "Home", action = "Index" });
+                routes.MapRoute("api2", "/player_api.php",
+                          new { controller = "Home", action = "Index" });
+                routes.MapRoute("api3", "/live/{username}/{password}/{streamId}.ts",
+                          new { controller = "Home", action = "Index" });
+                routes.MapRoute("api4", "/created_live/{username}/{password}/{streamId}.ts",
+                          new { controller = "Home", action = "Index" });
+                routes.MapRoute("api5", "/movie/{username}/{password}/{streamId}.mp4",
+                          new { controller = "Home", action = "Index" });
             });
         }
     }
