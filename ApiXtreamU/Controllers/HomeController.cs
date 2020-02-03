@@ -88,6 +88,7 @@ namespace ApiXtreamU.Controllers
                         xtp.Server_info = obj.Server_info;
                         xtp.Categories = obj.Categories;
                         xtp.Available_Channels = obj.Available_Channels;
+                        //xtp.Channels = obj.Channels;
                         string ob = JsonConvert.SerializeObject(xtp);
                         return Content(ob, "application/json");
                     }

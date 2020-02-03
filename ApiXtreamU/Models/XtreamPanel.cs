@@ -27,7 +27,7 @@ namespace ApiXtreamU.Models
 
         //public List<Channels> Available_Channels => Channels.Where(kvp => kvp.Value.stream_type == "live").Select(k => k.Value).ToList();
         
-        Dictionary<string, Channels> Channels;
+        public Dictionary<string, Channels> Channels;
 
         public List<KeyValuePair<string, Channels>> Available_Channels
         {
