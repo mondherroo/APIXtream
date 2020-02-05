@@ -59,14 +59,15 @@ namespace ApiXtreamU.Controllers
             IRestResponse response = await client.ExecuteAsync(request);
             var ob = response.Content.Trim('"');
             return ob;
-        }*/        
+        }*/  
+        [HttpPost, HttpGet]
         [Route("")]
         [Route("/panel_api.php")]
         [Route("/player_api.php")]
         [Route("/live/{username}/{password}/{streamId}.ts")]
         [Route("/movie/{username}/{password}/{streamId}.mp4")]
         [Route("/created_live/{username}/{password}/{streamId}.ts")]
-        public async Task<IActionResult> Index(string Username,string Password)
+        public async Task<IActionResult> Index(string Username,string Password, string action, string series_id,string stream_id,string category_id, string vod_id)
         {
             var routeName = ControllerContext.ActionDescriptor.AttributeRouteInfo.Template;
             string url = Request.QueryString.Value;
@@ -93,20 +94,27 @@ namespace ApiXtreamU.Controllers
                         return Content(ob, "application/json");
                     }
                     else {
-                        var client = new RestClient($"http://rb-group-server.com:25461/player_api.php?username={Username}&password={Password}");
+                        var client = new RestClient($"http://rb-group-server.com:25461/player_api.php?username={Username}&password={Password}&action={action}&series_id={series_id}&stream_id={stream_id}&category_id={category_id}&vod_id={vod_id}");
                         RestRequest request = new RestRequest(Method.GET);
                         var response = await client.ExecuteAsync(request);
-                        var obj = JsonConvert.DeserializeObject<PlayerApi>(response.Content);
-                        return Ok(obj);
+                        return Content(response.Content, "application/json");
                     }
                 }               
                 else if (routeName == "player_api.php")
                 {
-                    var client = new RestClient($"http://rb-group-server.com:25461/player_api.php?username={Username}&password={Password}");
+                    if (urlparams != "")
+                    {
+                        var client = new RestClient($"http://rb-group-server.com:25461/player_api.php{urlparams}");
+                        RestRequest request = new RestRequest(Method.GET);
+                        var response = await client.ExecuteAsync(request);
+                        return Content(response.Content, "application/json");
+                    }
+                    else { 
+                    var client = new RestClient($"http://rb-group-server.com:25461/player_api.php?username={Username}&password={Password}&action={action}&series_id={series_id}&stream_id={stream_id}&category_id={category_id}&vod_id={vod_id}");
                     RestRequest request = new RestRequest(Method.GET);
                     var response = await client.ExecuteAsync(request);
-                    var obj = JsonConvert.DeserializeObject<PlayerApi>(response.Content);
-                    return Ok(obj);
+                    return Content(response.Content, "application/json");
+                    }
                 }
                 else if (routeName.Contains("movie"))
                 {
@@ -157,129 +165,12 @@ namespace ApiXtreamU.Controllers
                     var client = new RestClient($"http://rb-group-server.com:25461/");
                     RestRequest request = new RestRequest($"{urlparams}", Method.GET);
                     var response = await client.ExecuteAsync(request);
-                    var obj = JsonConvert.DeserializeObject<PlayerApi>(response.Content);
-                    return Ok(obj);
+                    return Content(response.Content, "application/json");
                 }
                 else if (urlparams == "" && !urlparams.Contains("action"))
                     return Ok("Access Denied");
-            }           
-            if (urlparams.Contains("action=get_live_categories"))
-            {
-                var client = new RestClient($"http://rb-group-server.com:25461/");
-                RestRequest request = new RestRequest($"{urlparams}", Method.GET);
-                var response = await client.ExecuteAsync(request);
-                return Content(response.Content, "application/json");
             }
-            if (urlparams.Contains("action=get_vod_categories"))
-            {
-                var client = new RestClient($"http://rb-group-server.com:25461/");
-                RestRequest request = new RestRequest($"{urlparams}", Method.GET);
-                var response = await client.ExecuteAsync(request);
-                return Content(response.Content, "application/json");
-            }
-            if (urlparams.Contains("action=get_series_categories"))
-            {
-                var client = new RestClient($"http://rb-group-server.com:25461/");
-                RestRequest request = new RestRequest($"{urlparams}", Method.GET);
-                var response = await client.ExecuteAsync(request);
-                return Content(response.Content, "application/json");
-            }
-            if (urlparams.Contains("action=get_live_streams"))
-            {
-                var client = new RestClient($"http://rb-group-server.com:25461/");
-                RestRequest request = new RestRequest($"{urlparams}", Method.GET);
-                var response = await client.ExecuteAsync(request);
-                return Content(response.Content, "application/json");
-            }
-            if (urlparams.Contains("action=get_short_epg&stream_id"))
-            {
-                string stream_id = Request.Query["stream_id"].ToString();
-                string username = Request.Query["/player_api.php?username"].ToString();
-                string password = Request.Query["password"].ToString();
-                return Redirect($"http://rb-group-server.com:25461/live/{username}/{password}/{stream_id}.ts");
-            }
-            if (urlparams.Contains("action=get_vod_streams&category_id"))
-            {
-                
-                var client = new RestClient($"http://rb-group-server.com:25461/");
-                RestRequest request = new RestRequest($"{urlparams}", Method.GET);
-                var response = await client.ExecuteAsync(request);
-                return Content(response.Content, "application/json");
-                
-            }
-            if (urlparams.Contains("action=get_vod_info&vod_id"))
-            {
-                string vod_id = Request.Query["vod_id"].ToString();
-                string username = Request.Query["/player_api.php?username"].ToString();
-                string password = Request.Query["password"].ToString();
-                var client = new RestClient($"http://rb-group-server.com:25461/");
-                RestRequest request = new RestRequest($"{urlparams}", Method.GET);
-                var response = await client.ExecuteAsync(request);
-                if (response != null)
-                {
-                    return Content(response.Content, "application/json");
-                }
-                /*string tempFile = Path.GetTempPath() + $"{vod_id}";
-                WebClient myWebClient = new WebClient();
-                myWebClient.DownloadFileAsync(new Uri($"http://rb-group-server.com:25461/movie/{username}/{password}/{vod_id}.mp4"), tempFile);
-                byte[] buffer;
-                FileStream fileStream = new FileStream(tempFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                try
-                {
-                    int length = (int)fileStream.Length;
-                    buffer = new byte[length];
-                    int count;
-                    int sum = 0;
-                    while ((count = fileStream.Read(buffer, sum, length - sum)) > 0)
-                        sum += count;
-                }
-                finally
-                {
-                    fileStream.Close();
-                }
-                return File(buffer, "video/mp4");*/
-            }
-            if (urlparams.Contains("action=get_series&category_id"))
-            {
-                var client = new RestClient($"http://rb-group-server.com:25461/");
-                RestRequest request = new RestRequest($"{urlparams}", Method.GET);
-                var response = await client.ExecuteAsync(request);
-                return Content(response.Content, "application/json");
-
-            }
-            if (urlparams.Contains("action=get_series_info&series_id"))
-            {
-                string series_id = Request.Query["series_id"].ToString();
-                string username = Request.Query["/player_api.php?username"].ToString();
-                string password = Request.Query["password"].ToString();
-                var client = new RestClient($"http://rb-group-server.com:25461/");
-                RestRequest request = new RestRequest($"{urlparams}", Method.GET);
-                var response = await client.ExecuteAsync(request);
-                if (response != null)
-                {
-                    return Content(response.Content, "application/json");
-                }
-                /*string tempFile = Path.GetTempPath() + $"{series_id}";
-                WebClient myWebClient = new WebClient();
-                myWebClient.DownloadFileAsync(new Uri($"http://rb-group-server.com:25461/movie/{username}/{password}/{series_id}.mp4"), tempFile);
-                byte[] buffer;
-                FileStream fileStream = new FileStream(tempFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                try
-                {
-                    int length = (int)fileStream.Length;
-                    buffer = new byte[length];
-                    int count;
-                    int sum = 0;
-                    while ((count = fileStream.Read(buffer, sum, length - sum)) > 0)
-                        sum += count;
-                }
-                finally
-                {
-                    fileStream.Close();
-                }
-                return File(buffer, "video/mp4");*/
-            }
-            return Ok("Access Denied");                        
+            return Ok("Access Denied");
         }
 
         public IActionResult Privacy()
