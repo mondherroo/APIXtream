@@ -66,6 +66,7 @@ namespace ApiXtreamU.Controllers
         [Route("/player_api.php")]
         [Route("/live/{username}/{password}/{streamId}.ts")]
         [Route("/movie/{username}/{password}/{streamId}.mp4")]
+        [Route("/series/{username}/{password}/{streamId}.mp4")]
         [Route("/created_live/{username}/{password}/{streamId}.ts")]
         public async Task<IActionResult> Index(string Username,string Password, string action, string series_id,string stream_id,string category_id, string vod_id)
         {
@@ -90,6 +91,14 @@ namespace ApiXtreamU.Controllers
                         xtp.Categories = obj.Categories;
                         xtp.Available_Channels = obj.Available_Channels;
                         //xtp.Channels = obj.Channels;
+                        //xtp.Available_Movies = obj.Available_Movies;
+                        //xtp.Available_Series = obj.Available_Series;
+                        /*var dict = obj.Available_Movies.ToDictionary(p => p.Value);
+                        foreach (var person in obj.Available_Channels)
+                        {
+                            dict[person.Value] = person;
+                        }
+                        xtp.Available_Series = dict.Values.ToList();*/
                         string ob = JsonConvert.SerializeObject(xtp);
                         return Content(ob, "application/json");
                     }
@@ -117,6 +126,10 @@ namespace ApiXtreamU.Controllers
                     }
                 }
                 else if (routeName.Contains("movie"))
+                {
+                    return Redirect($"http://rb-group-server.com:25461{ path }");
+                }
+                else if (routeName.Contains("series"))
                 {
                     return Redirect($"http://rb-group-server.com:25461{ path }");
                 }

@@ -30,11 +30,26 @@ namespace ApiXtreamU.Models
         public Dictionary<string, Channels> Channels;
 
         public List<KeyValuePair<string, Channels>> Available_Channels
-        {
-            get { return Channels.Where(kvp => kvp.Value.stream_type.Contains("live")).ToList(); }
+        {            
+            get { return Channels.Where(kvp => kvp.Value.stream_type.Contains("live")).Union(Available_Movies.TakeLast(1097)).ToList(); }
             set { Channels = value.ToDictionary(x => x.Key, x => x.Value); }
         }
+        [JsonProperty("available_movies")]
+        public Dictionary<string, Channels> Movies;
 
+        public List<KeyValuePair<string, Channels>> Available_Movies
+        {
+            get { return Channels.Where(kvp => kvp.Value.stream_type.Contains("movie")).ToList(); }
+            set { Channels = value.ToDictionary(x => x.Key, x => x.Value); }
+        }
+        [JsonProperty("available_series")]
+        public Dictionary<string, Channels> Series;
+
+        public List<KeyValuePair<string, Channels>> Available_Series
+        {
+            get { return Channels.Where(kvp => kvp.Value.stream_type.Contains("series")).ToList(); }
+            set { Channels = value.ToDictionary(x => x.Key, x => x.Value); }
+        }
 
         public string GenerateUrlFrom(Channels channel, string protocol = "http", string outputFormat = "ts")
          {

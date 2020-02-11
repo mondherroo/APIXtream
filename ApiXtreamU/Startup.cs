@@ -100,6 +100,8 @@ namespace ApiXtreamU
                           new { controller = "Home", action = "Index" });
                 routes.MapRoute("api5", "/movie/{username}/{password}/{streamId}.mp4",
                           new { controller = "Home", action = "Index" });
+                routes.MapRoute("api6", "/series/{username}/{password}/{streamId}.mp4",
+                          new { controller = "Home", action = "Index" });
             });
         }
     }
